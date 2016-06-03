@@ -162,6 +162,17 @@ def instr (text):
 def infile (path):
 	return create_string_buffer(path)
 
+def bitmapbuf (z):
+	if not type(z) is POINTER(zint_symbol):
+		raise TypeError(
+			'Expected %s not %s' % (
+				str(type(POINTER(zint_symbol))),
+				str(type(z))
+			)
+		)
+	blen = z.contents.bitmap_width * z.contents.bitmap_height * 3
+	return cast(z.contents.bitmap, POINTER(c_char * blen))[0]
+
 class zint_render_line(Structure):
 	pass
 zint_render_line._fields_ = [
@@ -287,7 +298,7 @@ ZBarcode_ValidID.restype = c_int
 ZBarcode_ValidID.argtypes = [c_int]
 
 __all__ = [
-	'instr', 'infile',
+	'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
 	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
