@@ -153,7 +153,7 @@ ZINT_ROWS_MAX = 178
 ZINT_COLS_MAX = 178
 ZINT_ERR_SIZE = 100
 
-FILENAME_MAX = pathconf('.', 'PC_PATH_MAX')
+FILENAME_MAX = 256
 
 def instr (text):
 	l = len(text) + 1
