@@ -320,7 +320,7 @@ ZBarcode_ValidID.restype = c_int
 ZBarcode_ValidID.argtypes = [c_int]
 
 try:
-	ZBarcode_Version = _lib.ZBarcode_ValidID
+	ZBarcode_Version = _lib.ZBarcode_Version
 	ZBarcode_Version.restype = c_int
 	ZBarcode_Version.argtypes = []
 except:
