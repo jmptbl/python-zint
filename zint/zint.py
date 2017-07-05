@@ -1,4 +1,4 @@
-# Copyright (c) 2016, Aragon Gouveia
+# Copyright (c) 2017, Aragon Gouveia
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -271,7 +271,7 @@ zint_symbol._fields_ = [
 	('bitmap_height', c_int),
 	('bitmap_byte_length', c_uint),
 	('dot_size', c_float),
-	('rendered', POINTER(zint_render))
+	('rendered', POINTER(zint_render)),
 	('debug', c_int)
 ]
 
@@ -319,6 +319,21 @@ ZBarcode_ValidID = _lib.ZBarcode_ValidID
 ZBarcode_ValidID.restype = c_int
 ZBarcode_ValidID.argtypes = [c_int]
 
+try:
+	ZBarcode_Version = _lib.ZBarcode_ValidID
+	ZBarcode_Version.restype = c_int
+	ZBarcode_Version.argtypes = []
+except:
+	def ZBarcode_Version ():
+		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
+			return 20600
+		return 0
+
+if ZBarcode_Version() < 20600:
+	raise RuntimeError('libzint >=2.6.0 required')
+
+__version__ = '1.1'
+
 __all__ = [
 	'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
@@ -326,6 +341,7 @@ __all__ = [
 	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
 	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer', 
 	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID',
+	'ZBarcode_Version',
 	'zint_symbol', 'zint_render', 'zint_render_hexagon',
 	'zint_render_ring', 'zint_render_string', 'zint_render_line',
 	'ZINT_COLOUR_SIZE', 'ZINT_TEXT_SIZE', 'ZINT_PRIMARY_SIZE',
