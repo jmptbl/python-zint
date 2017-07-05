@@ -1,6 +1,7 @@
 import codecs
 import os
 from setuptools import setup
+from zint import __version__
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,7 +14,7 @@ def read(*parts):
         return f.read()
 
 setup(name='zint',
-      version='1.0',
+      version=__version__,
       description='Python ctypes interface to libzint',
       long_description=read('README.rst'),
       url='http://github.com/jmptbl/python-zint',

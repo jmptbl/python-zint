@@ -335,7 +335,7 @@ if ZBarcode_Version() < 20600:
 __version__ = '1.1'
 
 __all__ = [
-	'instr', 'infile', 'bitmapbuf',
+	'__version__', 'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
 	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
