@@ -41,9 +41,9 @@ Generate a QRCode in memory only::
     
     symbol = zint.ZBarcode_Create()
     symbol.contents.symbology = zint.BARCODE_QRCODE
-    symbol.contents.scale = 2.5
+    symbol.contents.scale = 0
     symbol.contents.option_1 = 4
-    symbol.contents.border_width = 4
+    symbol.contents.border_width = 0
     input = zint.instr('https://github.com/jmptbl/python-zint')
     if zint.ZBarcode_Encode_and_Buffer(symbol, input, 0, 0) != 0:
         print 'error: %s' % symbol.contents.errtxt
