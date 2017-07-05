@@ -1,4 +1,4 @@
-Copyright (c) 2016, Aragon Gouveia
+Copyright (c) 2017, Aragon Gouveia
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

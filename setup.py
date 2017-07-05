@@ -13,10 +13,22 @@ def read(*parts):
     with codecs.open(os.path.join(HERE, *parts), "rb", "utf-8") as f:
         return f.read()
 
+def description():
+    """
+Python-Zint is a ctypes interface to libzint of Robin Stuart's Zint project:
+
+<http://www.zint.org.uk/> <https://zint.github.io>
+
+Usage closely follows the C API:
+
+<http://www.zint.org.uk/Manual.aspx?type=p&page=5>
+    """
+    pass
+
 setup(name='zint',
       version=__version__,
       description='Python ctypes interface to libzint',
-      long_description=read('README.rst'),
+      long_description=description.__doc__.strip(),
       url='http://github.com/jmptbl/python-zint',
       author='Aragon Gouveia',
       author_email='aragon@phat.za.net',
