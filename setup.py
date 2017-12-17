@@ -1,8 +1,11 @@
+# coding=utf-8
 import codecs
 import os
+
 from setuptools import setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
+
 
 def read(*parts):
     """
@@ -11,6 +14,7 @@ def read(*parts):
     """
     with codecs.open(os.path.join(HERE, *parts), "rb", "utf-8") as f:
         return f.read()
+
 
 def description():
     """
@@ -23,6 +27,7 @@ Usage closely follows the C API:
 <http://www.zint.org.uk/Manual.aspx?type=p&page=5>
     """
     pass
+
 
 setup(name='zint',
       version='1.1',

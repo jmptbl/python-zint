@@ -1,3 +1,4 @@
+# coding=utf-8
 # Copyright (c) 2017, Aragon Gouveia
 # All rights reserved.
 # 
@@ -26,15 +27,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import *
-from os import pathconf
+from ctypes import POINTER, Structure, c_char, c_char_p, c_float, c_int, c_ubyte, c_uint, cast, cdll, create_string_buffer
 
 try:
 	_lib = cdll.LoadLibrary('libzint.so')
-except:
+except OSError:
 	try:
 		_lib = cdll.LoadLibrary('libzint.dylib')
-	except:
+	except OSError:
 		_lib = cdll.LoadLibrary('libzint.dll')
 
 BARCODE_CODE11 = 1
@@ -173,26 +173,30 @@ ZINT_ERR_SIZE = 100
 
 FILENAME_MAX = 256
 
-def instr (text):
+
+def instr(text):
 	l = len(text) + 1
 	return (c_ubyte * l).from_buffer_copy(create_string_buffer(text))
 
-def infile (path):
+
+def infile(path):
 	return create_string_buffer(path)
 
-def bitmapbuf (z):
+
+def bitmapbuf(z):
 	if not type(z) is POINTER(zint_symbol):
 		raise TypeError(
-			'Expected %s not %s' % (
-				str(type(POINTER(zint_symbol))),
-				str(type(z))
-			)
+				'Expected {} not {}'.format(type(POINTER(zint_symbol)),
+											type(z))
 		)
 	blen = z.contents.bitmap_width * z.contents.bitmap_height * 3
 	return cast(z.contents.bitmap, POINTER(c_char * blen))[0]
 
+
 class zint_render_line(Structure):
 	pass
+
+
 zint_render_line._fields_ = [
 	('x', c_float),
 	('y', c_float),
@@ -201,8 +205,11 @@ zint_render_line._fields_ = [
 	('next', POINTER(zint_render_line))
 ]
 
+
 class zint_render_string(Structure):
 	pass
+
+
 zint_render_string._fields_ = [
 	('x', c_float),
 	('y', c_float),
@@ -212,8 +219,11 @@ zint_render_string._fields_ = [
 	('next', POINTER(zint_render_string))
 ]
 
+
 class zint_render_ring(Structure):
 	pass
+
+
 zint_render_ring._fields_ = [
 	('x', c_float),
 	('y', c_float),
@@ -222,16 +232,22 @@ zint_render_ring._fields_ = [
 	('next', POINTER(zint_render_ring))
 ]
 
+
 class zint_render_hexagon(Structure):
 	pass
+
+
 zint_render_hexagon._fields_ = [
 	('x', c_float),
 	('y', c_float),
 	('next', POINTER(zint_render_hexagon))
 ]
 
+
 class zint_render(Structure):
 	pass
+
+
 zint_render._fields_ = [
 	('width', c_float),
 	('height', c_float),
@@ -241,8 +257,11 @@ zint_render._fields_ = [
 	('hexagons', POINTER(zint_render_hexagon))
 ]
 
+
 class zint_symbol(Structure):
 	pass
+
+
 zint_symbol._fields_ = [
 	('symbology', c_int),
 	('height', c_int),
@@ -323,8 +342,8 @@ try:
 	ZBarcode_Version = _lib.ZBarcode_Version
 	ZBarcode_Version.restype = c_int
 	ZBarcode_Version.argtypes = []
-except:
-	def ZBarcode_Version ():
+except NameError:
+	def ZBarcode_Version():
 		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
 			return 20600
 		return 0
@@ -338,8 +357,8 @@ __all__ = [
 	'__version__', 'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
-	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
-	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer', 
+	'ZBarcode_Encode_and_Print', 'ZBarcode_Encode_File_and_Print',
+	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer',
 	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID',
 	'ZBarcode_Version',
 	'zint_symbol', 'zint_render', 'zint_render_hexagon',
@@ -379,7 +398,7 @@ __all__ = [
 	'BARCODE_GRIDMATRIX', 'BARCODE_NO_ASCII', 'BARCODE_BIND',
 	'BARCODE_BOX', 'BARCODE_STDOUT', 'READER_INIT',
 	'SMALL_TEXT', 'BOLD_TEXT', 'CMYK_COLOUR',
-	'BARCODE_DOTTY_MODE','DATA_MODE', 'UNICODE_MODE', 'GS1_MODE',
+	'BARCODE_DOTTY_MODE', 'DATA_MODE', 'UNICODE_MODE', 'GS1_MODE',
 	'KANJI_MODE', 'SJIS_MODE', 'DM_SQUARE', 'DM_DMRE',
 	'ZINT_WARN_INVALID_OPTION', 'ZINT_WARN_USES_ECI',
 	'ZINT_ERROR_TOO_LONG', 'ZINT_ERROR_INVALID_DATA',
