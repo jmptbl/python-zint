@@ -84,6 +84,7 @@ BARCODE_ISBNX = 69
 BARCODE_RM4SCC = 70
 BARCODE_DATAMATRIX = 71
 BARCODE_EAN14 = 72
+BARCODE_VIN = 73
 BARCODE_CODABLOCKF = 74
 BARCODE_NVE18 = 75
 BARCODE_JAPANPOST = 76
@@ -111,6 +112,7 @@ BARCODE_HIBC_BLOCKF = 110
 BARCODE_HIBC_AZTEC = 112
 BARCODE_DOTCODE = 115
 BARCODE_HANXIN = 116
+BARCODE_MAILMARK = 121
 BARCODE_AZRUNE = 128
 BARCODE_CODE32 = 129
 BARCODE_EANX_CC = 130
@@ -260,6 +262,7 @@ zint_symbol._fields_ = [
 	('input_mode', c_int),
 	('eci', c_int),
 	('text', (c_ubyte * ZINT_TEXT_SIZE)),
+	('fontsize', c_int),
 	('rows', c_int),
 	('width', c_int),
 	('primary', (c_char * ZINT_PRIMARY_SIZE)),
@@ -325,21 +328,21 @@ try:
 	ZBarcode_Version.argtypes = []
 except:
 	def ZBarcode_Version ():
-		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
-			return 20600
+		if ZBarcode_ValidID(BARCODE_VIN) == 1:
+			return 20603
 		return 0
 
-if ZBarcode_Version() < 20600:
-	raise RuntimeError('libzint >=2.6.0 required')
+if ZBarcode_Version() < 20603:
+	raise RuntimeError('libzint >=2.6.3 required')
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 __all__ = [
 	'__version__', 'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
 	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
-	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer', 
+	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer',
 	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID',
 	'ZBarcode_Version',
 	'zint_symbol', 'zint_render', 'zint_render_hexagon',
@@ -361,7 +364,7 @@ __all__ = [
 	'BARCODE_MAXICODE', 'BARCODE_QRCODE', 'BARCODE_CODE128B',
 	'BARCODE_AUSPOST', 'BARCODE_AUSREPLY', 'BARCODE_AUSROUTE',
 	'BARCODE_AUSREDIRECT', 'BARCODE_ISBNX', 'BARCODE_RM4SCC',
-	'BARCODE_DATAMATRIX', 'BARCODE_EAN14', 'BARCODE_CODABLOCKF',
+	'BARCODE_DATAMATRIX', 'BARCODE_EAN14', 'BARCODE_VIN', 'BARCODE_CODABLOCKF',
 	'BARCODE_NVE18', 'BARCODE_JAPANPOST', 'BARCODE_KOREAPOST',
 	'BARCODE_RSS14STACK', 'BARCODE_RSS14STACK_OMNI', 'BARCODE_RSS_EXPSTACK',
 	'BARCODE_PLANET', 'BARCODE_MICROPDF417', 'BARCODE_ONECODE',
@@ -370,7 +373,7 @@ __all__ = [
 	'BARCODE_MICROQR', 'BARCODE_HIBC_128', 'BARCODE_HIBC_39',
 	'BARCODE_HIBC_DM', 'BARCODE_HIBC_QR', 'BARCODE_HIBC_PDF',
 	'BARCODE_HIBC_MICPDF', 'BARCODE_HIBC_BLOCKF', 'BARCODE_HIBC_AZTEC',
-	'BARCODE_DOTCODE', 'BARCODE_HANXIN',
+	'BARCODE_DOTCODE', 'BARCODE_HANXIN', 'BARCODE_MAILMARK',
 	'BARCODE_AZRUNE', 'BARCODE_CODE32', 'BARCODE_EANX_CC',
 	'BARCODE_EAN128_CC', 'BARCODE_RSS14_CC', 'BARCODE_RSS_LTD_CC',
 	'BARCODE_RSS_EXP_CC', 'BARCODE_UPCA_CC', 'BARCODE_UPCE_CC',
