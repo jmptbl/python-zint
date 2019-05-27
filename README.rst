@@ -1,4 +1,4 @@
-Python-Zint is a ctypes interface to libzint of 
+Python-Zint is a ctypes interface to libzint of
 Robin Stuart's Zint project:
 
 <http://www.zint.org.uk/>
@@ -15,7 +15,7 @@ Generate a QRCode saved to file out.png::
 
     import zint
     import sys
-    
+
     symbol = zint.ZBarcode_Create()
     symbol.contents.symbology = zint.BARCODE_QRCODE
     symbol.contents.scale = 2.5
@@ -38,7 +38,7 @@ Generate a QRCode in memory only::
 
     import zint
     import sys
-    
+
     symbol = zint.ZBarcode_Create()
     symbol.contents.symbology = zint.BARCODE_QRCODE
     symbol.contents.scale = 0
@@ -104,3 +104,12 @@ Result
     * *** *  * * *  * *      *** * *    *
     *     *    ** *  **** * * * * * **  *
     *******  * ****  *  ** **   *  ***  *
+
+
+Versions
+==========
+
+If you are using a zintlib version 2.6.2 or less, you need python-zint version 1.1
+
+For zintlib version 2.6.3+ then use python-zint version 1.2
+

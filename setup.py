@@ -1,5 +1,6 @@
 import codecs
 import os
+import zint
 from setuptools import setup
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -25,7 +26,7 @@ Usage closely follows the C API:
     pass
 
 setup(name='zint',
-      version='1.1',
+      version=zint.__version__,
       description='Python ctypes interface to libzint',
       long_description=description.__doc__.strip(),
       url='http://github.com/jmptbl/python-zint',
