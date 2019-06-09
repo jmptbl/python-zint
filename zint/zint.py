@@ -1,4 +1,4 @@
-# Copyright (c) 2017, Aragon Gouveia
+# Copyright (c) 2019, Aragon Gouveia
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from ctypes import *
-from os import pathconf
+from ctypes import POINTER, Structure, c_char, c_char_p, c_float, c_int, c_ubyte, c_uint, cast, cdll, create_string_buffer
 
 try:
 	_lib = cdll.LoadLibrary('libzint.so')
@@ -36,6 +35,21 @@ except:
 		_lib = cdll.LoadLibrary('libzint.dylib')
 	except:
 		_lib = cdll.LoadLibrary('libzint.dll')
+
+try:
+	ZBarcode_Version = _lib.ZBarcode_Version
+	ZBarcode_Version.restype = c_int
+	ZBarcode_Version.argtypes = []
+except:
+	def ZBarcode_Version ():
+		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
+			return 20600
+		return 0
+
+__libzint_ver = ZBarcode_Version()
+
+if __libzint_ver < 20600:
+	raise RuntimeError('libzint >=2.6.0 required')
 
 BARCODE_CODE11 = 1
 BARCODE_C25MATRIX = 2
@@ -84,6 +98,8 @@ BARCODE_ISBNX = 69
 BARCODE_RM4SCC = 70
 BARCODE_DATAMATRIX = 71
 BARCODE_EAN14 = 72
+if __libzint_ver >= 20603:
+	BARCODE_VIN = 73
 BARCODE_CODABLOCKF = 74
 BARCODE_NVE18 = 75
 BARCODE_JAPANPOST = 76
@@ -111,6 +127,8 @@ BARCODE_HIBC_BLOCKF = 110
 BARCODE_HIBC_AZTEC = 112
 BARCODE_DOTCODE = 115
 BARCODE_HANXIN = 116
+if __libzint_ver >= 20603:
+	BARCODE_MAILMARK = 121
 BARCODE_AZRUNE = 128
 BARCODE_CODE32 = 129
 BARCODE_EANX_CC = 130
@@ -126,6 +144,8 @@ BARCODE_RSS_EXPSTACK_CC = 139
 BARCODE_CHANNEL = 140
 BARCODE_CODEONE = 141
 BARCODE_GRIDMATRIX = 142
+if __libzint_ver >= 20601:
+	BARCODE_UPNQR = 143
 
 BARCODE_NO_ASCII = 1
 BARCODE_BIND = 2
@@ -142,6 +162,8 @@ UNICODE_MODE = 1
 GS1_MODE = 2
 KANJI_MODE = 3
 SJIS_MODE = 4
+if __libzint_ver >= 20602:
+	ESCAPE_MODE = 8
 
 DM_SQUARE = 100
 DM_DMRE = 101
@@ -226,9 +248,11 @@ class zint_render_hexagon(Structure):
 	pass
 zint_render_hexagon._fields_ = [
 	('x', c_float),
-	('y', c_float),
-	('next', POINTER(zint_render_hexagon))
+	('y', c_float)
 ]
+if __libzint_ver >= 20602:
+	zint_render_hexagon._fields_.append(('height', c_float))
+zint_render_hexagon._fields_.append(('next', POINTER(zint_render_hexagon)))
 
 class zint_render(Structure):
 	pass
@@ -256,7 +280,11 @@ zint_symbol._fields_ = [
 	('option_1', c_int),
 	('option_2', c_int),
 	('option_3', c_int),
-	('show_hrt', c_int),
+	('show_hrt', c_int)
+]
+if __libzint_ver >= 20603:
+	zint_symbol._fields_.append(('fontsize', c_int))
+zint_symbol._fields_.extend([
 	('input_mode', c_int),
 	('eci', c_int),
 	('text', (c_ubyte * ZINT_TEXT_SIZE)),
@@ -273,7 +301,7 @@ zint_symbol._fields_ = [
 	('dot_size', c_float),
 	('rendered', POINTER(zint_render)),
 	('debug', c_int)
-]
+])
 
 ZBarcode_Create = _lib.ZBarcode_Create
 ZBarcode_Create.restype = POINTER(zint_symbol)
@@ -319,27 +347,14 @@ ZBarcode_ValidID = _lib.ZBarcode_ValidID
 ZBarcode_ValidID.restype = c_int
 ZBarcode_ValidID.argtypes = [c_int]
 
-try:
-	ZBarcode_Version = _lib.ZBarcode_Version
-	ZBarcode_Version.restype = c_int
-	ZBarcode_Version.argtypes = []
-except:
-	def ZBarcode_Version ():
-		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
-			return 20600
-		return 0
-
-if ZBarcode_Version() < 20600:
-	raise RuntimeError('libzint >=2.6.0 required')
-
-__version__ = '1.1'
+__version__ = '1.2'
 
 __all__ = [
 	'__version__', 'instr', 'infile', 'bitmapbuf',
 	'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
-	'ZBarcode_Encode_and_Print','ZBarcode_Encode_File_and_Print',
-	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer', 
+	'ZBarcode_Encode_and_Print', 'ZBarcode_Encode_File_and_Print',
+	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer',
 	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID',
 	'ZBarcode_Version',
 	'zint_symbol', 'zint_render', 'zint_render_hexagon',
@@ -361,26 +376,45 @@ __all__ = [
 	'BARCODE_MAXICODE', 'BARCODE_QRCODE', 'BARCODE_CODE128B',
 	'BARCODE_AUSPOST', 'BARCODE_AUSREPLY', 'BARCODE_AUSROUTE',
 	'BARCODE_AUSREDIRECT', 'BARCODE_ISBNX', 'BARCODE_RM4SCC',
-	'BARCODE_DATAMATRIX', 'BARCODE_EAN14', 'BARCODE_CODABLOCKF',
-	'BARCODE_NVE18', 'BARCODE_JAPANPOST', 'BARCODE_KOREAPOST',
-	'BARCODE_RSS14STACK', 'BARCODE_RSS14STACK_OMNI', 'BARCODE_RSS_EXPSTACK',
+	'BARCODE_DATAMATRIX', 'BARCODE_EAN14'
+]
+if __libzint_ver >= 20603:
+	__all__.append('BARCODE_VIN')
+__all__.extend([
+	'BARCODE_CODABLOCKF', 'BARCODE_NVE18', 'BARCODE_JAPANPOST',
+	'BARCODE_KOREAPOST', 'BARCODE_RSS14STACK',
+	'BARCODE_RSS14STACK_OMNI', 'BARCODE_RSS_EXPSTACK',
 	'BARCODE_PLANET', 'BARCODE_MICROPDF417', 'BARCODE_ONECODE',
 	'BARCODE_PLESSEY', 'BARCODE_TELEPEN_NUM', 'BARCODE_ITF14',
 	'BARCODE_KIX', 'BARCODE_AZTEC', 'BARCODE_DAFT',
 	'BARCODE_MICROQR', 'BARCODE_HIBC_128', 'BARCODE_HIBC_39',
 	'BARCODE_HIBC_DM', 'BARCODE_HIBC_QR', 'BARCODE_HIBC_PDF',
-	'BARCODE_HIBC_MICPDF', 'BARCODE_HIBC_BLOCKF', 'BARCODE_HIBC_AZTEC',
-	'BARCODE_DOTCODE', 'BARCODE_HANXIN',
+	'BARCODE_HIBC_MICPDF', 'BARCODE_HIBC_BLOCKF',
+	'BARCODE_HIBC_AZTEC', 'BARCODE_DOTCODE', 'BARCODE_HANXIN'
+])
+if __libzint_ver >= 20603:
+	__all__.append('BARCODE_MAILMARK')
+__all__.extend([
 	'BARCODE_AZRUNE', 'BARCODE_CODE32', 'BARCODE_EANX_CC',
 	'BARCODE_EAN128_CC', 'BARCODE_RSS14_CC', 'BARCODE_RSS_LTD_CC',
 	'BARCODE_RSS_EXP_CC', 'BARCODE_UPCA_CC', 'BARCODE_UPCE_CC',
 	'BARCODE_RSS14STACK_CC', 'BARCODE_RSS14_OMNI_CC',
 	'BARCODE_RSS_EXPSTACK_CC', 'BARCODE_CHANNEL', 'BARCODE_CODEONE',
-	'BARCODE_GRIDMATRIX', 'BARCODE_NO_ASCII', 'BARCODE_BIND',
+	'BARCODE_GRIDMATRIX'
+])
+if __libzint_ver >= 20601:
+	__all__.append('BARCODE_UPNQR')
+__all__.extend([
+	'BARCODE_NO_ASCII', 'BARCODE_BIND',
 	'BARCODE_BOX', 'BARCODE_STDOUT', 'READER_INIT',
 	'SMALL_TEXT', 'BOLD_TEXT', 'CMYK_COLOUR',
-	'BARCODE_DOTTY_MODE','DATA_MODE', 'UNICODE_MODE', 'GS1_MODE',
-	'KANJI_MODE', 'SJIS_MODE', 'DM_SQUARE', 'DM_DMRE',
+	'BARCODE_DOTTY_MODE', 'DATA_MODE', 'UNICODE_MODE', 'GS1_MODE',
+	'KANJI_MODE', 'SJIS_MODE'
+])
+if __libzint_ver >= 20602:
+	__all__.append('ESCAPE_MODE')
+__all__.extend([
+	'DM_SQUARE', 'DM_DMRE',
 	'ZINT_WARN_INVALID_OPTION', 'ZINT_WARN_USES_ECI',
 	'ZINT_ERROR_TOO_LONG', 'ZINT_ERROR_INVALID_DATA',
 	'ZINT_ERROR_INVALID_CHECK', 'ZINT_ERROR_INVALID_OPTION',
@@ -388,4 +422,4 @@ __all__ = [
 	'ZINT_ERROR_MEMORY', 'OUT_BUFFER',
 	'OUT_PNG_FILE', 'OUT_BMP_FILE', 'OUT_GIF_FILE',
 	'OUT_PCX_FILE', 'OUT_JPG_FILE', 'OUT_TIF_FILE'
-]
+])

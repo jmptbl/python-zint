@@ -21,9 +21,9 @@ Generate a QRCode saved to file out.png::
     symbol.contents.scale = 2.5
     symbol.contents.option_1 = 4
     symbol.contents.border_width = 4
-    input = zint.instr('https://github.com/jmptbl/python-zint')
+    input = zint.instr(b'https://github.com/jmptbl/python-zint')
     if zint.ZBarcode_Encode_and_Print(symbol, input, 0, 0) != 0:
-        print 'error: %s' % symbol.contents.errtxt
+        print('error: %s' % symbol.contents.errtxt)
         sys.exit(1)
     zint.ZBarcode_Delete(symbol)
 
@@ -44,9 +44,9 @@ Generate a QRCode in memory only::
     symbol.contents.scale = 0
     symbol.contents.option_1 = 4
     symbol.contents.border_width = 0
-    input = zint.instr('https://github.com/jmptbl/python-zint')
+    input = zint.instr(b'https://github.com/jmptbl/python-zint')
     if zint.ZBarcode_Encode_and_Buffer(symbol, input, 0, 0) != 0:
-        print 'error: %s' % symbol.contents.errtxt
+        print('error: %s' % symbol.contents.errtxt)
         sys.exit(1)
     bitmap = zint.bitmapbuf(symbol)
     pixel = 0
@@ -60,7 +60,7 @@ Generate a QRCode in memory only::
             else:
                 line += '*'
             pixel += 3
-        print line
+        print(line)
     zint.ZBarcode_Delete(symbol)
 
 Result
