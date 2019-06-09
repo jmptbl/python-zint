@@ -36,13 +36,18 @@ except:
 	except:
 		_lib = cdll.LoadLibrary('libzint.dll')
 
+ZBarcode_ValidID = _lib.ZBarcode_ValidID
+ZBarcode_ValidID.restype = c_int
+ZBarcode_ValidID.argtypes = [c_int]
+
 try:
 	ZBarcode_Version = _lib.ZBarcode_Version
 	ZBarcode_Version.restype = c_int
 	ZBarcode_Version.argtypes = []
 except:
 	def ZBarcode_Version ():
-		if ZBarcode_ValidID(BARCODE_DOTCODE) == 1:
+		# if BARCODE_DOTCODE is valid, version is 2.6.0
+		if ZBarcode_ValidID(115) == 1:
 			return 20600
 		return 0
 
@@ -342,10 +347,6 @@ ZBarcode_Encode_and_Buffer.argtypes = [POINTER(zint_symbol), POINTER(c_ubyte), c
 ZBarcode_Encode_File_and_Buffer = _lib.ZBarcode_Encode_File_and_Buffer
 ZBarcode_Encode_File_and_Buffer.restype = c_int
 ZBarcode_Encode_File_and_Buffer.argtypes = [POINTER(zint_symbol), c_char_p, c_int]
-
-ZBarcode_ValidID = _lib.ZBarcode_ValidID
-ZBarcode_ValidID.restype = c_int
-ZBarcode_ValidID.argtypes = [c_int]
 
 __version__ = '1.2'
 
