@@ -25,7 +25,7 @@ Usage closely follows the C API:
     pass
 
 setup(name='zint',
-      version='1.2',
+      version='1.3',
       description='Python ctypes interface to libzint',
       long_description=description.__doc__.strip(),
       url='http://github.com/jmptbl/python-zint',

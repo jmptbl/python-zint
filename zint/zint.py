@@ -151,6 +151,8 @@ BARCODE_CODEONE = 141
 BARCODE_GRIDMATRIX = 142
 if __libzint_ver >= 20601:
 	BARCODE_UPNQR = 143
+if __libzint_ver >= 20604:
+	BARCODE_ULTRA = 144
 
 BARCODE_NO_ASCII = 1
 BARCODE_BIND = 2
@@ -161,12 +163,15 @@ SMALL_TEXT = 32
 BOLD_TEXT = 64
 CMYK_COLOUR = 128
 BARCODE_DOTTY_MODE = 256
+if __libzint_ver >= 20604:
+	GS1_GS_SEPARATOR = 512
 
 DATA_MODE = 0
 UNICODE_MODE = 1
 GS1_MODE = 2
-KANJI_MODE = 3
-SJIS_MODE = 4
+if __libzint_ver < 20604:
+	KANJI_MODE = 3
+	SJIS_MODE = 4
 if __libzint_ver >= 20602:
 	ESCAPE_MODE = 8
 
@@ -184,6 +189,10 @@ ZINT_ERROR_FILE_ACCESS = 10
 ZINT_ERROR_MEMORY = 11
 
 OUT_BUFFER = 0
+if __libzint_ver >= 20604:
+	OUT_SVG_FILE = 10
+	OUT_EPS_FILE = 20
+	OUT_EMF_FILE = 30
 OUT_PNG_FILE = 100
 OUT_BMP_FILE = 120
 OUT_GIF_FILE = 140
@@ -217,6 +226,56 @@ def bitmapbuf (z):
 		)
 	blen = z.contents.bitmap_width * z.contents.bitmap_height * 3
 	return cast(z.contents.bitmap, POINTER(c_char * blen))[0]
+
+if __libzint_ver >= 20604:
+	class zint_vector_rect(Structure):
+		pass
+	zint_vector_rect._fields_ = [
+		('x', c_float),
+		('y', c_float),
+		('height', c_float),
+		('width', c_float),
+		('colour', c_int),
+		('next', POINTER(zint_vector_rect))
+	]
+	class zint_vector_hexagon(Structure):
+		pass
+	zint_vector_hexagon._fields_ = [
+		('x', c_float),
+		('y', c_float),
+		('diameter', c_float),
+		('next', POINTER(zint_vector_hexagon))
+	]
+	class zint_vector_string(Structure):
+		pass
+	zint_vector_string._fields_ = [
+		('x', c_float),
+		('y', c_float),
+		('fsize', c_float),
+		('width', c_float),
+		('length', c_int),
+		('text', POINTER(c_ubyte)),
+		('next', POINTER(zint_vector_string))
+	]
+	class zint_vector_circle(Structure):
+		pass
+	zint_vector_circle._fields_ = [
+		('x', c_float),
+		('y', c_float),
+		('diameter', c_float),
+		('colour', c_int),
+		('next', POINTER(zint_vector_circle))
+	]
+	class zint_vector(Structure):
+		pass
+	zint_vector._fields_ = [
+		('width', c_float),
+		('height', c_float),
+		('rectangles', POINTER(zint_vector_rect)),
+		('hexagons', POINTER(zint_vector_hexagon)),
+		('strings', POINTER(zint_vector_string)),
+		('circles', POINTER(zint_vector_circle))
+	]
 
 class zint_render_line(Structure):
 	pass
@@ -303,7 +362,11 @@ zint_symbol._fields_.extend([
 	('bitmap_width', c_int),
 	('bitmap_height', c_int),
 	('bitmap_byte_length', c_uint),
-	('dot_size', c_float),
+	('dot_size', c_float)
+])
+if __libzint_ver >= 20604:
+	zint_symbol._fields_.append(('vector', POINTER(zint_vector)))
+zint_symbol._fields_.extend([
 	('rendered', POINTER(zint_render)),
 	('debug', c_int)
 ])
@@ -348,16 +411,38 @@ ZBarcode_Encode_File_and_Buffer = _lib.ZBarcode_Encode_File_and_Buffer
 ZBarcode_Encode_File_and_Buffer.restype = c_int
 ZBarcode_Encode_File_and_Buffer.argtypes = [POINTER(zint_symbol), c_char_p, c_int]
 
-__version__ = '1.2'
+if __libzint_ver >= 20604:
+	ZBarcode_Buffer_Vector = _lib.ZBarcode_Buffer_Vector
+	ZBarcode_Buffer_Vector.restype = c_int
+	ZBarcode_Buffer_Vector.argtypes = [POINTER(zint_symbol), c_int]
+	
+	ZBarcode_Encode_and_Buffer_Vector = _lib.ZBarcode_Encode_and_Buffer_Vector
+	ZBarcode_Encode_and_Buffer_Vector.restype = c_int
+	ZBarcode_Encode_and_Buffer_Vector.argtypes = [POINTER(zint_symbol), POINTER(c_ubyte), c_int, c_int]
+
+	ZBarcode_Encode_File_and_Buffer_Vector = _lib.ZBarcode_Encode_File_and_Buffer_Vector
+	ZBarcode_Encode_File_and_Buffer_Vector.restype = c_int
+	ZBarcode_Encode_File_and_Buffer_Vector.argtypes = [POINTER(zint_symbol), c_char_p, c_int]
+
+
+__version__ = '1.3'
 
 __all__ = [
 	'__version__', 'instr', 'infile', 'bitmapbuf',
-	'ZBarcode_Create', 'ZBarcode_Delete',
+	'ZBarcode_Version', 'ZBarcode_Create', 'ZBarcode_Delete',
 	'ZBarcode_Encode', 'ZBarcode_Encode_File', 'ZBarcode_Print',
 	'ZBarcode_Encode_and_Print', 'ZBarcode_Encode_File_and_Print',
 	'ZBarcode_Buffer', 'ZBarcode_Encode_and_Buffer',
-	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID',
-	'ZBarcode_Version',
+	'ZBarcode_Encode_File_and_Buffer', 'ZBarcode_ValidID'
+]
+if __libzint_ver >= 20604:
+	__all__.extend([
+		'ZBarcode_Buffer_Vector', 'ZBarcode_Encode_and_Buffer_Vector',
+		'ZBarcode_Encode_File_and_Buffer_Vector',
+		'zint_vector_rect', 'zint_vector_hexagon', 'zint_vector_string',
+		'zint_vector_circle', 'zint_vector'
+	])
+__all__.extend([
 	'zint_symbol', 'zint_render', 'zint_render_hexagon',
 	'zint_render_ring', 'zint_render_string', 'zint_render_line',
 	'ZINT_COLOUR_SIZE', 'ZINT_TEXT_SIZE', 'ZINT_PRIMARY_SIZE',
@@ -378,7 +463,7 @@ __all__ = [
 	'BARCODE_AUSPOST', 'BARCODE_AUSREPLY', 'BARCODE_AUSROUTE',
 	'BARCODE_AUSREDIRECT', 'BARCODE_ISBNX', 'BARCODE_RM4SCC',
 	'BARCODE_DATAMATRIX', 'BARCODE_EAN14'
-]
+])
 if __libzint_ver >= 20603:
 	__all__.append('BARCODE_VIN')
 __all__.extend([
@@ -405,13 +490,20 @@ __all__.extend([
 ])
 if __libzint_ver >= 20601:
 	__all__.append('BARCODE_UPNQR')
+if __libzint_ver >= 20604:
+	__all__.append('BARCODE_ULTRA')
 __all__.extend([
 	'BARCODE_NO_ASCII', 'BARCODE_BIND',
 	'BARCODE_BOX', 'BARCODE_STDOUT', 'READER_INIT',
 	'SMALL_TEXT', 'BOLD_TEXT', 'CMYK_COLOUR',
-	'BARCODE_DOTTY_MODE', 'DATA_MODE', 'UNICODE_MODE', 'GS1_MODE',
-	'KANJI_MODE', 'SJIS_MODE'
+	'BARCODE_DOTTY_MODE'
 ])
+if __libzint_ver >= 20604:
+	__all__.append('GS1_GS_SEPARATOR')
+__all__.extend(['DATA_MODE', 'UNICODE_MODE', 'GS1_MODE'])
+if __libzint_ver < 20604:
+	__all__.extend(['KANJI_MODE', 'SJIS_MODE'])
+	
 if __libzint_ver >= 20602:
 	__all__.append('ESCAPE_MODE')
 __all__.extend([
@@ -420,7 +512,11 @@ __all__.extend([
 	'ZINT_ERROR_TOO_LONG', 'ZINT_ERROR_INVALID_DATA',
 	'ZINT_ERROR_INVALID_CHECK', 'ZINT_ERROR_INVALID_OPTION',
 	'ZINT_ERROR_ENCODING_PROBLEM', 'ZINT_ERROR_FILE_ACCESS',
-	'ZINT_ERROR_MEMORY', 'OUT_BUFFER',
+	'ZINT_ERROR_MEMORY', 'OUT_BUFFER'
+])
+if __libzint_ver >= 20604:
+	__all__.extend(['OUT_SVG_FILE', 'OUT_EPS_FILE', 'OUT_EMF_FILE'])
+__all__.extend([
 	'OUT_PNG_FILE', 'OUT_BMP_FILE', 'OUT_GIF_FILE',
 	'OUT_PCX_FILE', 'OUT_JPG_FILE', 'OUT_TIF_FILE'
 ])
