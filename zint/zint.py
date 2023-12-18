@@ -210,6 +210,9 @@ if __libzint_ver >= 21100:
 	BARCODE_QUIET_ZONES = 0x0800
 	BARCODE_NO_QUIET_ZONES = 0x1000
 	COMPLIANT_HEIGHT = 0x2000
+if __libzint_ver >= 21300:
+	EANUPC_GUARD_WHITESPACE = 0x4000
+	EMBED_VECTOR_FONT = 0x8000
 
 DATA_MODE = 0
 UNICODE_MODE = 1
@@ -225,14 +228,20 @@ if __libzint_ver >= 21000:
 if __libzint_ver >= 21100:
 	HEIGHTPERROW_MODE = 0x0040
 	FAST_MODE = 0x0080
+if __libzint_ver >= 21300:
+	EXTRA_ESCAPE_MODE = 0x0100
 
 DM_SQUARE = 100
 DM_DMRE = 101
+if __libzint_ver >= 21300:
+	DM_ISO_144 = 128
 
 if __libzint_ver >= 20800:
 	ZINT_FULL_MULTIBYTE = 200
 	ULTRA_COMPRESSION = 128
 
+if __libzint_ver >= 21300:
+	ZINT_WARN_HRT_TRUNCATED = 1
 ZINT_WARN_INVALID_OPTION = 2
 ZINT_WARN_USES_ECI = 3
 if __libzint_ver >= 21000:
@@ -249,12 +258,18 @@ if __libzint_ver >= 21000:
 	ZINT_ERROR_FILE_WRITE = 12
 	ZINT_ERROR_USES_ECI = 13
 	ZINT_ERROR_NONCOMPLIANT = 14
+if __libzint_ver >= 21300:
+	ZINT_ERROR_HRT_TRUNCATED = 15
+if __libzint_ver >= 21000:
 	WARN_DEFAULT = 0
 	WARN_FAIL_ALL = 2
 	ZINT_DEBUG_PRINT = 0x0001
 	ZINT_DEBUG_TEST = 0x0002
 	ZINT_CAP_HRT = 0x0001
 	ZINT_CAP_STACKABLE = 0x0002
+if __libzint_ver >= 21300:
+	ZINT_CAP_EANUPC = 0x0004
+if __libzint_ver >= 21000:
 	ZINT_CAP_EXTENDABLE = 0x0004
 	ZINT_CAP_COMPOSITE = 0x0008
 	ZINT_CAP_ECI = 0x0010
@@ -283,8 +298,12 @@ OUT_PCX_FILE = 160
 OUT_JPG_FILE = 180
 OUT_TIF_FILE = 200
 
-ZINT_COLOUR_SIZE = 10
-ZINT_TEXT_SIZE = 128
+if __libzint_ver >= 21300:
+	ZINT_COLOUR_SIZE = 16
+	ZINT_TEXT_SIZE = 200
+else:
+	ZINT_COLOUR_SIZE = 10
+	ZINT_TEXT_SIZE = 128
 ZINT_PRIMARY_SIZE = 128
 ZINT_ROWS_MAX = 200
 if __libzint_ver >= 21100:
@@ -477,7 +496,7 @@ fields.extend([
 	('option_3', c_int),
 	('show_hrt', c_int)
 ])
-if __libzint_ver >= 20603:
+if 21300 > __libzint_ver >= 20603:
 	fields.append(('fontsize', c_int))
 fields.extend([
 	('input_mode', c_int),
@@ -486,8 +505,11 @@ fields.extend([
 if __libzint_ver >= 21200:
 	fields.append(('dpmm', c_float))
 if __libzint_ver >= 21100:
+	fields.append(('dot_size', c_float))
+if __libzint_ver >= 21300:
+	fields.append(('text_gap', c_float))
+if __libzint_ver >= 21100:
 	fields.extend([
-		('dot_size', c_float),
 		('guard_descent', c_float),
 		('structapp', zint_structapp),
 		('warn_level', c_int),
@@ -516,7 +538,8 @@ fields.extend([
 ])
 if __libzint_ver >= 20901:
 	fields.append(('alphamap', POINTER(c_ubyte)))
-fields.append(('bitmap_byte_length', c_uint))
+if __libzint_ver < 21300:
+	fields.append(('bitmap_byte_length', c_uint))
 if __libzint_ver < 21100:
 	fields.append(('dot_size', c_float))
 if __libzint_ver >= 20604:
@@ -540,6 +563,11 @@ if __libzint_ver >= 21100:
 ZBarcode_Create = _lib.ZBarcode_Create
 ZBarcode_Create.restype = POINTER(zint_symbol)
 ZBarcode_Create.argtypes = []
+
+if __libzint_ver >= 21300:
+	ZBarcode_Reset = _lib.ZBarcode_Reset
+	ZBarcode_Reset.restype = None
+	ZBarcode_Reset.argtypes = [POINTER(zint_symbol)]
 
 ZBarcode_Delete = _lib.ZBarcode_Delete
 ZBarcode_Delete.restype = None
@@ -785,3 +813,9 @@ __all__.extend([
 	'OUT_PNG_FILE', 'OUT_BMP_FILE', 'OUT_GIF_FILE',
 	'OUT_PCX_FILE', 'OUT_JPG_FILE', 'OUT_TIF_FILE'
 ])
+if __libzint_ver >= 21300:
+	__all__.extend([
+		'EANUPC_GUARD_WHITESPACE', 'EMBED_VECTOR_FONT',
+		'EXTRA_ESCAPE_MODE', 'DM_ISO_144', 'ZINT_WARN_HRT_TRUNCATED',
+		'ZINT_ERROR_HRT_TRUNCATED', 'ZINT_CAP_EANUPC', 'ZBarcode_Reset'
+	])
